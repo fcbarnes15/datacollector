@@ -1,0 +1,52 @@
+
+apply plugin: 'java'
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.1.1'
+    }
+}
+
+
+apply plugin: 'maven'
+apply plugin: 'idea'
+apply plugin: 'groovy'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+if (!JavaVersion.current().java8Compatible) {
+    throw new IllegalStateException('Java 8 Required')
+}
+
+project.ext {
+    groovyVersion = '2.4.5'
+    archivesBaseName = 'datacollector'
+}
+
+jar {
+    baseName = 'datacollector'
+}
+
+repositories {
+        mavenCentral()
+}
+
+dependencies {
+    compile "org.codehaus.groovy:groovy-all:$groovyVersion"
+    testCompile 'org.spockframework:spock-core:1.0-groovy-2.3'
+}
+
+shadowJar {
+    baseName = "${archivesBaseName}"
+    classifier = ''
+    manifest {
+        attributes 'Main-Class': 'com.syndicate.datacollector.DataCollector'
+    }
+}
+
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.1'
+}
