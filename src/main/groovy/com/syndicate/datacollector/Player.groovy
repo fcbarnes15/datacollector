@@ -14,4 +14,6 @@ class Player {
     String teamAbbreviation
     String teamCode
     String gamesPlayedFlag
+    int price
+    String position
 }
