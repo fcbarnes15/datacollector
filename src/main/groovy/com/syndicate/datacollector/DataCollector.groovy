@@ -8,13 +8,18 @@ import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import org.apache.http.util.EntityUtils
+import org.hibernate.Session
+import org.hibernate.SessionFactory
+import org.hibernate.boot.MetadataSources
+import org.hibernate.boot.registry.StandardServiceRegistry
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 
 public class DataCollector {
   
     static void main(String... args) {
 
-       getPlayerPriceList()
+       createDatabaseEntry()
 
     }
 
@@ -23,11 +28,11 @@ public class DataCollector {
 
         def result = jsonSlurper.parseText(getPlayerInfoFromJSONString())
 
-        ArrayList<Player> playerList = new ArrayList<>()
+        ArrayList<PlayerInfo> playerList = new ArrayList<>()
 
         result.playerList.each { it ->
 
-            def player = new Player(name: it.fn + " " + it.ln ,
+            def player = new PlayerInfo(name: it.fn + " " + it.ln ,
                     position: it.pn,
                     price: it.s)
 
@@ -56,11 +61,11 @@ public class DataCollector {
 
         def result = jsonSlurper.parseText(getPlayerInfoFromNBAStatsSite())
 
-        ArrayList<Player> playerList = new ArrayList<>()
+        ArrayList<PlayerInfo> playerList = new ArrayList<>()
 
         result.resultSets[0].rowSet.each { it ->
 
-            playerList.add(new Player(id: it[0],
+            playerList.add(new PlayerInfo(id: it[0],
                     name: it[1],
                     onCurrentRoster: it[2],
                     fromYear: it[3],
@@ -109,6 +114,63 @@ public class DataCollector {
         }
 
 
+    }
+
+    static void createDatabaseEntry() {
+
+        SessionFactory sessionFactory
+
+        final StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
+                .configure() // configures settings from hibernate.cfg.xml
+                .build()
+        try {
+            sessionFactory = new MetadataSources( registry ).buildMetadata().buildSessionFactory()
+        }
+        catch (Exception e) {
+            // The registry would be destroyed by the SessionFactory, but we had trouble building the SessionFactory
+            // so destroy it manually.
+            StandardServiceRegistryBuilder.destroy( registry )
+        }
+
+
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        session.save( new PlayerInfo( name : "Anthony Davis",
+                                      onCurrentRoster : true,
+                                      fromYear : "2012",
+                                      toYear : "2015",
+                                      playerCode : "ant_dav",
+                                      teamId : 1,
+                                      teamCity : "New Orleans",
+                                      teamName : "Pelicans",
+                                      teamAbbreviation : "NO",
+                                      teamCode : "1",
+                                      gamesPlayedFlag : "yes",
+                                      price : 9200,
+                                      position : 'PF' ) );
+
+
+
+        session.save( new PlayerInfo( name : "Julius Randle",
+                                      onCurrentRoster : true,
+                                      fromYear : "2012",
+                                      toYear : "2015",
+                                      playerCode : "jul_ran",
+                                      teamId : 2,
+                                      teamCity : "Los Angeles",
+                                      teamName : "Lakers",
+                                      teamAbbreviation : "LAL",
+                                      teamCode : "2",
+                                      gamesPlayedFlag : "yes",
+                                      price : 6000,
+                                      position : 'PF' ) );
+
+        session.getTransaction().commit();
+        session.close();
+
+        if ( sessionFactory != null ) {
+            sessionFactory.close()
+        }
     }
 
     static String getPlayerInfoFromJSONString() {
