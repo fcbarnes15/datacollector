@@ -28,11 +28,11 @@ public class DataCollector {
 
         def result = jsonSlurper.parseText(getPlayerInfoFromJSONString())
 
-        ArrayList<PlayerInfo> playerList = new ArrayList<>()
+        ArrayList<Player> playerList = new ArrayList<>()
 
         result.playerList.each { it ->
 
-            def player = new PlayerInfo(name: it.fn + " " + it.ln ,
+            def player = new Player(name: it.fn + " " + it.ln ,
                     position: it.pn,
                     price: it.s)
 
@@ -61,11 +61,11 @@ public class DataCollector {
 
         def result = jsonSlurper.parseText(getPlayerInfoFromNBAStatsSite())
 
-        ArrayList<PlayerInfo> playerList = new ArrayList<>()
+        ArrayList<Player> playerList = new ArrayList<>()
 
         result.resultSets[0].rowSet.each { it ->
 
-            playerList.add(new PlayerInfo(id: it[0],
+            playerList.add(new Player(id: it[0],
                     name: it[1],
                     onCurrentRoster: it[2],
                     fromYear: it[3],
@@ -130,40 +130,205 @@ public class DataCollector {
             // The registry would be destroyed by the SessionFactory, but we had trouble building the SessionFactory
             // so destroy it manually.
             StandardServiceRegistryBuilder.destroy( registry )
+            return;
         }
-
 
         Session session = sessionFactory.openSession();
         session.beginTransaction();
-        session.save( new PlayerInfo( name : "Anthony Davis",
-                                      onCurrentRoster : true,
-                                      fromYear : "2012",
-                                      toYear : "2015",
-                                      playerCode : "ant_dav",
-                                      teamId : 1,
-                                      teamCity : "New Orleans",
-                                      teamName : "Pelicans",
-                                      teamAbbreviation : "NO",
-                                      teamCode : "1",
-                                      gamesPlayedFlag : "yes",
-                                      price : 9200,
-                                      position : 'PF' ) );
+
+        TeamGameLog teamGame1 = new TeamGameLog( id : 1,
+                date : new Date(115, 9, 31) ,
+                ptsFor: 100,
+                ptsAgainst: 89,
+                three_ptrsFor: 3,
+                three_ptrsAgainst: 6,
+                offReboundsFor: 8,
+                offReboundsAgainst: 7,
+                defReboundsFor: 8,
+                defReboundsAgainst: 8,
+                stealsFor: 2,
+                stealsAgainst: 6,
+                blocksFor: 1,
+                blocksAgainst: 2,
+                tosCommitted: 6,
+                tosForced: 8,
+                assistsFor : 8,
+                assistsAgainst : 19)
+
+        TeamGameLog teamGame2 = new TeamGameLog(id : 2,
+                date : new Date(115, 9, 30) ,
+                ptsFor: 101,
+                ptsAgainst: 90,
+                three_ptrsFor: 5,
+                three_ptrsAgainst: 4,
+                offReboundsFor: 9,
+                offReboundsAgainst: 2,
+                defReboundsFor: 1,
+                defReboundsAgainst: 0,
+                stealsFor: 9,
+                stealsAgainst: 3,
+                blocksFor: 5,
+                blocksAgainst: 6,
+                tosCommitted: 7,
+                tosForced: 9,
+                assistsFor : 10,
+                assistsAgainst : 11)
+
+        TeamGameLog teamGame3 = new TeamGameLog(id : 3,
+                date : new Date(115, 9, 31) ,
+                ptsFor: 89,
+                ptsAgainst: 100,
+                three_ptrsFor: 2,
+                three_ptrsAgainst: 3,
+                offReboundsFor: 5,
+                offReboundsAgainst: 5,
+                defReboundsFor: 5,
+                defReboundsAgainst: 5,
+                stealsFor: 5,
+                stealsAgainst: 5,
+                blocksFor: 5,
+                blocksAgainst: 5,
+                tosCommitted: 5,
+                tosForced: 5,
+                assistsFor : 5,
+                assistsAgainst : 20)
+
+
+        Team team1 = new Team(id : 1,
+                teamCity : "New Orleans",
+                teamName : "Pelicans",
+                teamAbbreviation : "NO",
+                teamCode : "NO",
+                ptsFor : 200,
+                ptsAgainst : 188,
+                three_ptrsFor : 14,
+                three_ptrsAgainst : 12,
+                offReboundsFor : 20,
+                offReboundsAgainst : 15,
+                defReboundsFor : 40,
+                defReboundsAgainst : 35,
+                stealsFor : 10,
+                stealsAgainst : 8,
+                blocksFor : 15,
+                blocksAgainst : 20,
+                tosCommitted : 20,
+                tosForced : 18,
+                assistsFor : 20,
+                assistsAgainst : 21)
+
+
+        Team team2 = new Team(id : 2,
+                teamCity : "Los Angeles",
+                teamName : "Lakers",
+                teamAbbreviation : "LAL",
+                teamCode : "LAL",
+                ptsFor : 210,
+                ptsAgainst : 150,
+                three_ptrsFor : 12,
+                three_ptrsAgainst : 11,
+                offReboundsFor : 22,
+                offReboundsAgainst : 17,
+                defReboundsFor : 43,
+                defReboundsAgainst : 36,
+                stealsFor : 11,
+                stealsAgainst : 9,
+                blocksFor : 19,
+                blocksAgainst : 25,
+                tosCommitted : 23,
+                tosForced : 12,
+                assistsFor : 28,
+                assistsAgainst : 20)
+
+        teamGame1.team = team1
+        teamGame1.opponent = team2
+
+        teamGame2.team = team1
+        teamGame2.opponent = team2
+
+
+        session.save(teamGame1);
+        session.save(teamGame2);
+
+        Set<TeamGameLog> teamGameLogs = new HashSet<TeamGameLog>()
+        teamGameLogs.add(teamGame1)
+        teamGameLogs.add(teamGame2)
+
+
+        team1.gameLogs = teamGameLogs
+
+        teamGame3.team = team2
+        teamGame3.opponent = team1
+
+        Set<TeamGameLog> teamGameLogs2 = new HashSet<TeamGameLog>()
+        teamGameLogs2.add(teamGame3)
+
+        team2.gameLogs = teamGameLogs2
+        session.save(team2);
+        session.save(team1);
+
+        PlayerGameLog playerGame1 = new PlayerGameLog(  id : 2,
+                 date : new Date(115, 9, 31) ,
+                 team : team1,
+                 opponent : team2,
+                 minutes : 23.1,
+                 pts: 20,
+                 three_ptrs: 3,
+                 offRebounds: 8,
+                 defRebounds: 8,
+                 steals: 2,
+                 blocks: 1,
+                 turnovers: 6,
+                 assists : 8 )
+
+        PlayerGameLog playerGame2 = new PlayerGameLog(id : 3,
+                date : new Date(115, 9, 30) ,
+                team : team1,
+                opponent : team2,
+                minutes : 21.1,
+                pts: 19,
+                three_ptrs: 2,
+                offRebounds: 7,
+                defRebounds: 7,
+                steals: 0,
+                blocks: 4,
+                turnovers: 2,
+                assists : 7 )
 
 
 
-        session.save( new PlayerInfo( name : "Julius Randle",
-                                      onCurrentRoster : true,
-                                      fromYear : "2012",
-                                      toYear : "2015",
-                                      playerCode : "jul_ran",
-                                      teamId : 2,
-                                      teamCity : "Los Angeles",
-                                      teamName : "Lakers",
-                                      teamAbbreviation : "LAL",
-                                      teamCode : "2",
-                                      gamesPlayedFlag : "yes",
-                                      price : 6000,
-                                      position : 'PF' ) );
+
+
+
+        Player player1 = new Player(   id : 1,
+                                     dkId : 1,
+                                     name : "Anthony Davis",
+                            currentSalary : 9200,
+                                 position : 'PF',
+                              currentTeam : team1,
+                           numGamesPlayed : 2,
+                                  minutes : 23.4,
+                                      pts : 25,
+                               three_ptrs : 1,
+                              offRebounds : 10,
+                              defRebounds : 10,
+                                   steals : 3,
+                                   blocks : 6,
+                                turnovers : 5,
+                                  assists : 6)
+
+
+        playerGame1.player = player1
+        playerGame2.player = player1
+
+        session.save(playerGame1);
+        session.save(playerGame2);
+
+        Set<PlayerGameLog> playerGameLogs = new HashSet<PlayerGameLog>()
+        playerGameLogs.add(playerGame1)
+        playerGameLogs.add(playerGame2)
+
+        player1.gameLogs = playerGameLogs
+        session.save(player1);
 
         session.getTransaction().commit();
         session.close();

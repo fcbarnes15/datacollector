@@ -33,7 +33,10 @@
         <!-- Drop and re-create the database schema on startup -->
         <property name="hbm2ddl.auto">create</property>
 
-        <mapping class="com.syndicate.datacollector.PlayerInfo"/>
+        <mapping class="com.syndicate.datacollector.Player"/>
+        <mapping class="com.syndicate.datacollector.PlayerGameLog"/>
+        <mapping class="com.syndicate.datacollector.Team"/>
+        <mapping class="com.syndicate.datacollector.TeamGameLog" />
 
     </session-factory>
 
